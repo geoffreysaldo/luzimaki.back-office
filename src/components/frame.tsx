@@ -16,14 +16,8 @@ import { OrderNotificationFragment } from "../graphql/orders/fragments/__generat
 function Frame(props: any) {
   const apolloClient = useApolloClient();
   const dispatch = useDispatch();
-  const authState = useSelector(
-    (state: StoreState) => state.auth.storeIds?.at(0),
-    shallowEqual
-  );
-  const orderNotificationState = useSelector(
-    (state: StoreState) => state.orderNotifications,
-    shallowEqual
-  );
+  const authState = useSelector((state: StoreState) => state.auth.storeIds?.at(0), shallowEqual);
+  const orderNotificationState = useSelector((state: StoreState) => state.orderNotifications, shallowEqual);
 
   useEffect(() => {
     apolloClient
@@ -31,23 +25,14 @@ function Frame(props: any) {
         query: GET_ORDER_NOTIFICATIONS_QUERY,
         variables: { storeId: authState },
       })
-      .then((res) =>
-        dispatch(
-          OrderNotificationActions.setOrderNotifications(
-            res.data?.getOrderNotifications
-          )
-        )
-      );
+      .then((res) => dispatch(OrderNotificationActions.setOrderNotifications(res.data?.getOrderNotifications)));
   }, []);
 
   useSubscription(ORDER_NOTIFICATION_SUBSCRIPTION, {
     variables: { storeId: authState },
     onSubscriptionData: ({ subscriptionData }) => {
-      dispatch(
-        OrderNotificationActions.addOrderNotification(
-          subscriptionData.data.orderNotification
-        )
-      );
+      console.log(subscriptionData);
+      dispatch(OrderNotificationActions.addOrderNotification(subscriptionData.data.orderNotification));
     },
   });
 
@@ -66,11 +51,7 @@ function Frame(props: any) {
                     title: "Liste des commandes",
                     url: "/orders",
                     elementEnd: orderNotificationState.notifications?.length ? (
-                      <Chip
-                        endContent={<Icon icon="mingcute:notification-fill" />}
-                        variant="flat"
-                        color="secondary"
-                      >
+                      <Chip endContent={<Icon icon="mingcute:notification-fill" />} variant="flat" color="secondary">
                         {orderNotificationState.notifications?.length}
                       </Chip>
                     ) : (

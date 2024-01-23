@@ -112,7 +112,6 @@ function OrderInformations({ emitOrderInformations }: OrderInformationsProps) {
         zipCode: values.zipCode,
       }) ||
       {};
-    console.log(values);
     emitOrderInformations({
       firstname: values.firstname,
       lastname: values.lastname,

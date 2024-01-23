@@ -8,8 +8,6 @@ import { GET_STORE_SETTINGS } from "../../graphql/store/queries/get-store-settin
 import { useCallback, useMemo } from "react";
 import { Card, Checkbox } from "@nextui-org/react";
 
-interface CloseStoreCardProps {}
-
 function CloseStoreCard() {
   const storeId = useSelector((state: StoreState) => state.store.id);
 
@@ -18,7 +16,6 @@ function CloseStoreCard() {
     useMutation<EditCloseStoreSettings>(EDIT_CLOSE_STORE_SETTINGS);
 
   const storeSettings = useMemo(() => getStoreSettingsData?.getStore.settings, [getStoreSettingsData]);
-  console.log(storeSettings);
 
   const handleChangeLunch = useCallback(
     (value: any) => {
@@ -31,9 +28,7 @@ function CloseStoreCard() {
             },
           },
         });
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     },
     [storeSettings]
   );
@@ -49,9 +44,7 @@ function CloseStoreCard() {
             },
           },
         });
-      } catch (err) {
-        console.log(err);
-      }
+      } catch (err) {}
     },
     [storeSettings]
   );

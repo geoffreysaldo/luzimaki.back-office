@@ -1,16 +1,4 @@
-import {
-  Button,
-  Link,
-  Listbox,
-  ListboxItem,
-  Navbar,
-  NavbarBrand,
-  NavbarContent,
-  NavbarItem,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@nextui-org/react";
+import { Button, Link, Listbox, ListboxItem, Navbar, NavbarBrand, NavbarContent, NavbarItem, Popover, PopoverContent, PopoverTrigger } from "@nextui-org/react";
 import { useDispatch, useSelector } from "react-redux";
 import { AuthActions } from "../store/auth.slice";
 import { useNavigate } from "react-router-dom";
@@ -31,13 +19,7 @@ function Header() {
     (v: any) => {
       const value = Array.from(v);
       setSelectedKeys(new Set([value.at(0)]));
-      dispatch(
-        storeActions.setStore(
-          organizationState.stores.find(
-            (s: StoreFragment) => s.id === value.at(0)
-          )
-        )
-      );
+      dispatch(storeActions.setStore(organizationState.stores.find((s: StoreFragment) => s.id === value.at(0))));
     },
     [selectedKeys, organizationState]
   );
@@ -60,7 +42,7 @@ function Header() {
               selectedKeys={selectedKeys}
               onSelectionChange={handleSelectionKeys}
             >
-              {organizationState.stores.map((s: StoreFragment) => (
+              {organizationState.stores?.map((s: StoreFragment) => (
                 <ListboxItem key={s.id}>{s.name}</ListboxItem>
               ))}
             </Listbox>
@@ -69,10 +51,7 @@ function Header() {
 
         <img className="w-40" src={logoLuzumaki} />
       </NavbarBrand>
-      <NavbarContent
-        className="hidden sm:flex gap-4"
-        justify="center"
-      ></NavbarContent>
+      <NavbarContent className="hidden sm:flex gap-4" justify="center"></NavbarContent>
       <NavbarContent justify="end">
         <NavbarItem>
           <Button

@@ -30,31 +30,28 @@ function SignInPage() {
     },
   });
 
-  const [signIn, { loading, error, data }] = useLazyQuery<SignInRestorer>(
-    SIGN_IN_RESTORER,
-    {
-      onCompleted: async (response) => {
-        setBannerError(false);
-        dispatch(
-          AuthActions.login({
-            organizationId: response.signInRestorer.organizationId,
-            storeIds: response.signInRestorer.storeIds,
-            email: response.signInRestorer.email,
-            firstname: response.signInRestorer.firstname,
-            lastname: response.signInRestorer.lastname,
-            accessToken: response.signInRestorer.accessToken,
-          })
-        );
-        await getOrganization({
-          variables: { organizationId: response.signInRestorer.organizationId },
-        });
-        navigate("/orders");
-      },
-      onError: (error) => {
-        setBannerError(true);
-      },
-    }
-  );
+  const [signIn, { loading, error, data }] = useLazyQuery<SignInRestorer>(SIGN_IN_RESTORER, {
+    onCompleted: async (response) => {
+      setBannerError(false);
+      dispatch(
+        AuthActions.login({
+          organizationId: response.signInRestorer.organizationId,
+          storeIds: response.signInRestorer.storeIds,
+          email: response.signInRestorer.email,
+          firstname: response.signInRestorer.firstname,
+          lastname: response.signInRestorer.lastname,
+          accessToken: response.signInRestorer.accessToken,
+        })
+      );
+      await getOrganization({
+        variables: { organizationId: response.signInRestorer.organizationId },
+      });
+      navigate("/orders");
+    },
+    onError: (error) => {
+      setBannerError(true);
+    },
+  });
 
   const {
     register,
@@ -96,22 +93,12 @@ function SignInPage() {
               isRequired
               {...register("password")}
               validationState={errors.password ? "invalid" : "valid"}
-              errorMessage={
-                errors.password ? "Le mot de passe est requis" : null
-              }
+              errorMessage={errors.password ? "Le mot de passe est requis" : null}
               endContent={
                 isPasswordVisible ? (
-                  <Icon
-                    icon="gridicons:not-visible"
-                    className="cursor-pointer"
-                    onClick={handlePasswordVisibility}
-                  />
+                  <Icon icon="gridicons:not-visible" className="cursor-pointer" onClick={handlePasswordVisibility} />
                 ) : (
-                  <Icon
-                    icon="gridicons:visible"
-                    className="cursor-pointer"
-                    onClick={handlePasswordVisibility}
-                  />
+                  <Icon icon="gridicons:visible" className="cursor-pointer" onClick={handlePasswordVisibility} />
                 )
               }
             />

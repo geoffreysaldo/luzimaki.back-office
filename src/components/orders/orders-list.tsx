@@ -15,6 +15,7 @@ import Filters from "../common/filters";
 import { ORDERS_LIST_FILTERS } from "./orders-list-filters.settings";
 import SettingsCard from "./settings-card";
 import CloseStoreCard from "./close-store-card";
+import NewOrdersList from "./new-orders-list";
 
 const initialState: string[] = [];
 
@@ -48,7 +49,9 @@ function OrdersList() {
   useSubscription(ORDER_NOTIFICATION_SUBSCRIPTION, {
     variables: { storeId: authState.storeIds?.at(0) },
     onSubscriptionData: ({ client, subscriptionData }) => {
+      console.log(subscriptionData);
       if (authState.storeIds?.at(0) === subscriptionData.data.orderNotification.storeId) {
+        console.log("passage if");
         notificationDispatch({
           type: "addNotification",
           payload: subscriptionData.data.orderNotification.orderId,
@@ -105,17 +108,7 @@ function OrdersList() {
   const ordersListMarkup = (
     <div className="w-full space-y-1">
       {ordersSearch?.ordersSearch?.orders?.map((o: SearchOrdersResponseFragment_orders, i: number) => (
-        <OrderCard
-          key={`order-${o.orderNumber}-${i}`}
-          order={o!}
-          isNew={notificationState.includes(o.id)}
-          select={() => {
-            notificationDispatch({
-              type: "deleteNotification",
-              payload: o.id,
-            });
-          }}
-        />
+        <OrderCard key={`order-${o.orderNumber}-${i}`} order={o!} />
       ))}
     </div>
   );
@@ -151,13 +144,20 @@ function OrdersList() {
           {loading && skeletonPage}
           {!loading && ordersSearch?.ordersSearch?.totalCount > 0 && (
             <>
+              {notificationState.length > 0 && <NewOrdersList notifications={notificationState} />}
               {ordersListMarkup}
               {paginationMarkup}
             </>
           )}
         </div>
         <div className="w-1/4">
-          <Filters filters={ORDERS_LIST_FILTERS} onChangeFilter={(f) => setFiltersInput(f)} />
+          <Filters
+            filters={ORDERS_LIST_FILTERS}
+            onChangeFilter={(f) => {
+              setFiltersInput(f);
+              notificationState.map((n) => notificationDispatch({ type: "addNotification", payload: n }));
+            }}
+          />
         </div>
       </div>
     </div>

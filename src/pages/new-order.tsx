@@ -91,7 +91,6 @@ function NewOrder() {
 
   const handleNewOrder = useCallback(
     async (orderInformations: any) => {
-      console.log(orderInformations, orderInformations.guestsNumber);
       setLoading(true);
       const totalDiscount = Number(
         (shoppingBag.lines.map((oL) => oL.totalTaxInclusive).reduce((a, b) => a + b, 0) * (shoppingBag.discount.value / 100)).toFixed(2)
