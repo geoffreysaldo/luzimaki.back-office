@@ -16,6 +16,7 @@ import { ORDERS_LIST_FILTERS } from "./orders-list-filters.settings";
 import SettingsCard from "./settings-card";
 import CloseStoreCard from "./close-store-card";
 import NewOrdersList from "./new-orders-list";
+import { StoreState } from "../../store";
 
 const initialState: string[] = [];
 
@@ -23,6 +24,7 @@ const ITEMS_PER_PAGE = 20;
 
 function OrdersList() {
   const [pageState, setPage] = useState(1);
+  const storeId = useSelector((state: StoreState) => state.store.id);
   const [filtersInput, setFiltersInput] = useState<{
     facets: FacetInput[];
     numericFilters: NumericFilterInput[];
@@ -49,9 +51,7 @@ function OrdersList() {
   useSubscription(ORDER_NOTIFICATION_SUBSCRIPTION, {
     variables: { storeId: authState.storeIds?.at(0) },
     onSubscriptionData: ({ client, subscriptionData }) => {
-      console.log(subscriptionData);
       if (authState.storeIds?.at(0) === subscriptionData.data.orderNotification.storeId) {
-        console.log("passage if");
         notificationDispatch({
           type: "addNotification",
           payload: subscriptionData.data.orderNotification.orderId,
@@ -63,7 +63,7 @@ function OrdersList() {
   const { data: ordersSearch, loading } = useQuery(SEARCH_ORDERS, {
     variables: {
       searchInput: {
-        facets: [...filtersInput.facets, { key: "financialState", value: PaymentState.PAID }],
+        facets: [...filtersInput.facets, { key: "storeId", value: storeId }],
         numericFilters: filtersInput.numericFilters,
         from: (pageState - 1) * ITEMS_PER_PAGE,
         to: pageState * ITEMS_PER_PAGE,

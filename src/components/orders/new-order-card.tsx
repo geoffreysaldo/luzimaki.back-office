@@ -3,7 +3,7 @@ import { Card } from "@nextui-org/card";
 import { Chip } from "@nextui-org/chip";
 import { Skeleton } from "@nextui-org/skeleton";
 import { useCallback, useEffect, useState } from "react";
-import { OrderMode, OrderSource } from "../../__generated__/globalTypes";
+import { OrderMode, OrderSource, PaymentState } from "../../__generated__/globalTypes";
 import { Table, TableBody, TableCell, TableColumn, TableHeader, TableRow } from "@nextui-org/table";
 import { Button } from "@nextui-org/button";
 import { useLazyQuery, useMutation } from "@apollo/client";
@@ -86,6 +86,17 @@ function NewOrderCard({ orderId }: NewOrderCardProps) {
     }
   }, [order]);
 
+  const getPaymentStatusColor = useCallback(() => {
+    switch (order?.financialState) {
+      case PaymentState.PAID:
+        return "success";
+      case PaymentState.UNPAID:
+        return "danger";
+      default:
+        return "danger";
+    }
+  }, [order]);
+
   const getChipColorByOrderMode = useCallback(() => {
     switch (order?.mode) {
       case OrderMode.DELIVERY:
@@ -136,6 +147,7 @@ function NewOrderCard({ orderId }: NewOrderCardProps) {
                     {order.mode}
                   </Chip>
                   {order.mode === OrderMode.DELIVERY && <Chip color="warning">{`${order.contact.city}, ${order.contact.zipCode}`}</Chip>}
+                  {order?.guestsNumber && <Chip className="text-sm">{order.guestsNumber} couverts</Chip>}
                   <div>Commande {order.orderNumber}</div>
                 </div>
                 <div className="flex flex-row items-center space-x-1">
@@ -148,7 +160,8 @@ function NewOrderCard({ orderId }: NewOrderCardProps) {
                   <Chip className="text-sm">
                     {toEuro(order.totalTaxInclusive)} {order.discount > 0 && `(${order.discount}%)`}
                   </Chip>
-                  {order?.guestsNumber && <Chip className="text-sm">{order.guestsNumber} couverts</Chip>}
+
+                  <Chip color={getPaymentStatusColor()}>{order.financialState}</Chip>
                   {order.tips !== null && order.tips > 0 && <Chip color="success">Pourboire {toEuro(order.tips)}</Chip>}
                 </div>
               </div>
@@ -174,6 +187,10 @@ function NewOrderCard({ orderId }: NewOrderCardProps) {
                 </div>
               </div>
             </div>
+
+            {order.contact?.addressComplement && (
+              <div className="flex flex-row justify-center font-bold p-3 border-2 my-3 mx-12 rounded-md">Commentaire: {order.contact?.addressComplement}</div>
+            )}
 
             <Table shadow="none" aria-label="Example static collection table">
               <TableHeader>

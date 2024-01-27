@@ -9,6 +9,7 @@ import { useMutation } from "@apollo/client";
 import { OrderPrint } from "../../graphql/orders/mutations/__generated__/orderPrint";
 import { useSelector } from "react-redux";
 import { StoreState } from "../../store";
+import { PaymentState } from "../../__generated__/globalTypes";
 
 interface OrderCardProps {
   order: SearchOrdersResponseFragment_orders;
@@ -48,6 +49,15 @@ function OrderCard(props: OrderCardProps) {
     }
   }, [order]);
 
+  const getPaymentStatusColor = useCallback(() => {
+    switch (order.financialState) {
+      case PaymentState.PAID:
+        return "success";
+      case PaymentState.UNPAID:
+        return "danger";
+    }
+  }, [order]);
+
   const buildOrderTicket = (url: string) => {
     const downloadLink = document.createElement("a");
     const fileName = `${url}`;
@@ -80,6 +90,7 @@ function OrderCard(props: OrderCardProps) {
                   {order.mode}
                 </Chip>
                 {order.mode === OrderMode.DELIVERY && <Chip color="warning">{`${order.contact.city}, ${order.contact.zipCode}`}</Chip>}
+                {order?.guestsNumber && <Chip className="text-sm">{order.guestsNumber} couverts</Chip>}
                 <div>Commande {order.orderNumber}</div>
               </div>
               <div className="flex flex-row items-center space-x-1">
@@ -92,7 +103,7 @@ function OrderCard(props: OrderCardProps) {
                 <Chip className="text-sm">
                   {toEuro(order.totalTaxInclusive)} {order.discount > 0 && `(${order.discount}%)`}
                 </Chip>
-                {order?.guestsNumber && <Chip className="text-sm">{order.guestsNumber} couverts</Chip>}
+                <Chip color={getPaymentStatusColor()}>{order.financialState}</Chip>
                 {order.tips !== null && order.tips > 0 && <Chip color="success">Pourboire {toEuro(order.tips)}</Chip>}
               </div>
             </div>
@@ -119,7 +130,9 @@ function OrderCard(props: OrderCardProps) {
             </div>
           </div>
 
-          <div className="flex flex-row justify-center font-bold p-3 border-2 my-3 mx-12 rounded-md">Commentaire: {order.contact.addressComplement}</div>
+          {order.contact.addressComplement && (
+            <div className="flex flex-row justify-center font-bold p-3 border-2 my-3 mx-12 rounded-md">Commentaire: {order.contact.addressComplement}</div>
+          )}
 
           <Table shadow="none" aria-label="Example static collection table">
             <TableHeader>
