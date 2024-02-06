@@ -1,11 +1,4 @@
-import {
-  Accordion,
-  AccordionItem,
-  Card,
-  Checkbox,
-  CheckboxGroup,
-  Input,
-} from "@nextui-org/react";
+import { Accordion, AccordionItem, Card, Checkbox, CheckboxGroup, Input } from "@nextui-org/react";
 import { FiltersProps } from "./interfaces/filters.interface";
 import { useCallback, useEffect, useReducer, useState } from "react";
 import { FilterType } from "./enums/filter-type.enum";
@@ -14,11 +7,13 @@ import { FilterField } from "./interfaces/filter-field.interface";
 import { FacetInput } from "../../graphql/__generated__/globalTypes";
 
 function Filters(props: FiltersProps) {
+  const today = new Date().setHours(0, 0, 0, 0);
+  const tommorow = today + 86400000;
   const { filters, onChangeFilter } = props;
   const [filtersFields, setFiltersFields] = useState<FilterField[]>([]);
   const [filterState, dispatchFilter] = useReducer(filterReducer, {
     facets: [],
-    numericFilters: [],
+    numericFilters: [{ key: "expectedAt", min: today, max: tommorow }],
   });
 
   useEffect(() => {
@@ -54,11 +49,7 @@ function Filters(props: FiltersProps) {
                   <Input
                     type="date"
                     variant="bordered"
-                    value={
-                      filterState.numericFilters?.find(
-                        (nF: any) => f.key === nF.key
-                      )?.min
-                    }
+                    value={formatDateFromEpoch(filterState.numericFilters?.find((nF: any) => f.key === nF.key)?.min)}
                     onChange={(e) =>
                       dispatchFilter({
                         type: f.type,
@@ -73,11 +64,7 @@ function Filters(props: FiltersProps) {
                   <Input
                     type="date"
                     variant="bordered"
-                    value={
-                      filterState.numericFilters?.find(
-                        (nF: any) => f.key === nF.key
-                      )?.max
-                    }
+                    value={formatDateFromEpoch(filterState.numericFilters?.find((nF: any) => f.key === nF.key)?.max)}
                     onChange={(e) =>
                       dispatchFilter({
                         type: f.type,
@@ -97,10 +84,7 @@ function Filters(props: FiltersProps) {
               ...f,
               component: (
                 <CheckboxGroup
-                  value={
-                    filterState.facets?.find((fF: any) => f.key === fF.key)
-                      ?.values || []
-                  }
+                  value={filterState.facets?.find((fF: any) => f.key === fF.key)?.values || []}
                   onValueChange={(v) =>
                     dispatchFilter({
                       type: f.type,
@@ -121,14 +105,8 @@ function Filters(props: FiltersProps) {
               ...f,
               component: (
                 <>
-                  <Input
-                    type="number"
-                    onChange={(e) => console.log(e.target.value)}
-                  />
-                  <Input
-                    type="Number"
-                    onChange={(e) => console.log(e.target.value)}
-                  />
+                  <Input type="number" onChange={(e) => console.log(e.target.value)} />
+                  <Input type="Number" onChange={(e) => console.log(e.target.value)} />
                 </>
               ),
             };
@@ -155,9 +133,7 @@ function Filters(props: FiltersProps) {
       case FilterType.DATE:
         return {
           ...filterState,
-          numericFilters: filterState.numericFilters.some(
-            (f: any) => f.key === action.payload.key
-          )
+          numericFilters: filterState.numericFilters.some((f: any) => f.key === action.payload.key)
             ? filterState.numericFilters.map((f: any) =>
                 f.key === action.payload.key
                   ? {
@@ -190,9 +166,9 @@ function Filters(props: FiltersProps) {
 
   return (
     <Card>
-      <Accordion selectionMode="multiple">
+      <Accordion selectionMode="multiple" defaultExpandedKeys={["0"]}>
         {filtersFields.map((f, i) => (
-          <AccordionItem key={`filter-${i}`} title={f.label}>
+          <AccordionItem key={i === 0 ? "0" : i} title={f.label}>
             <div className="mx-2">{f.component}</div>
           </AccordionItem>
         ))}
@@ -203,10 +179,7 @@ function Filters(props: FiltersProps) {
 
 export default Filters;
 
-function getFacetFilters(
-  facets: FacetInput[],
-  action: { payload: { key: string; value?: string; values?: string[] } }
-) {
+function getFacetFilters(facets: FacetInput[], action: { payload: { key: string; value?: string; values?: string[] } }) {
   if (action.payload.values?.length === 0) {
     return facets.filter((f: FacetInput) => f.key !== action.payload.key);
   }
@@ -227,4 +200,13 @@ function getFacetFilters(
           values: action.payload.values || undefined,
         },
       ];
+}
+
+function formatDateFromEpoch(epoch: number) {
+  const date = new Date(epoch);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0"); // Ajoute un zéro devant si nécessaire
+  const day = String(date.getDate()).padStart(2, "0"); // Ajoute un zéro devant si nécessaire
+
+  return `${year}-${month}-${day}`;
 }

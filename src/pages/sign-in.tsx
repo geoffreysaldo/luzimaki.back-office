@@ -23,7 +23,7 @@ function SignInPage() {
     setPasswordVisible(!isPasswordVisible);
   }, [isPasswordVisible]);
 
-  const [getOrganization] = useLazyQuery<GetOrganization>(GET_ORGANIZATION, {
+  const [getOrganization, { loading: organizationLoading }] = useLazyQuery<GetOrganization>(GET_ORGANIZATION, {
     onCompleted: async (response) => {
       dispatch(organizationActions.setOrganization(response.getOrganization));
       dispatch(storeActions.setStore(response.getOrganization.stores?.at(0)));
@@ -46,7 +46,9 @@ function SignInPage() {
       await getOrganization({
         variables: { organizationId: response.signInRestorer.organizationId },
       });
-      navigate("/orders");
+      setTimeout(() => {
+        navigate("/orders");
+      }, 1000);
     },
     onError: (error) => {
       setBannerError(true);
@@ -110,7 +112,7 @@ function SignInPage() {
                 </div>
               </div>
             )}
-            <Button type="submit" isLoading={loading}>
+            <Button type="submit" isLoading={loading || organizationLoading}>
               Se connecter
             </Button>
           </form>
