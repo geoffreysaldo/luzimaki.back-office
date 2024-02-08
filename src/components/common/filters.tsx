@@ -7,13 +7,11 @@ import { FilterField } from "./interfaces/filter-field.interface";
 import { FacetInput } from "../../graphql/__generated__/globalTypes";
 
 function Filters(props: FiltersProps) {
-  const today = new Date().setHours(0, 0, 0, 0);
-  const tommorow = today + 86400000;
   const { filters, onChangeFilter } = props;
   const [filtersFields, setFiltersFields] = useState<FilterField[]>([]);
   const [filterState, dispatchFilter] = useReducer(filterReducer, {
     facets: [],
-    numericFilters: [{ key: "expectedAt", min: today, max: tommorow }],
+    numericFilters: [],
   });
 
   useEffect(() => {
@@ -166,9 +164,9 @@ function Filters(props: FiltersProps) {
 
   return (
     <Card>
-      <Accordion selectionMode="multiple" defaultExpandedKeys={["0"]}>
+      <Accordion>
         {filtersFields.map((f, i) => (
-          <AccordionItem key={i === 0 ? "0" : i} title={f.label}>
+          <AccordionItem key={i} title={f.label}>
             <div className="mx-2">{f.component}</div>
           </AccordionItem>
         ))}
@@ -202,7 +200,7 @@ function getFacetFilters(facets: FacetInput[], action: { payload: { key: string;
       ];
 }
 
-function formatDateFromEpoch(epoch: number) {
+export function formatDateFromEpoch(epoch: number) {
   const date = new Date(epoch);
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0"); // Ajoute un zéro devant si nécessaire

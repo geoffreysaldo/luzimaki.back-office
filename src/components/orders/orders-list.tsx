@@ -11,7 +11,7 @@ import { OrderNotificationActions } from "../../store/order-notification.slice";
 import { ORDER_NOTIFICATION_SUBSCRIPTION } from "../../graphql/orders/subscriptions/order-notification.subscription";
 import { AuthRestorerResponse } from "../../store/auth.slice";
 import { useCallback, useReducer, useState } from "react";
-import Filters from "../common/filters";
+import Filters, { formatDateFromEpoch } from "../common/filters";
 import { ORDERS_LIST_FILTERS } from "./orders-list-filters.settings";
 import SettingsCard from "./settings-card";
 import CloseStoreCard from "./close-store-card";
@@ -64,7 +64,16 @@ function OrdersList() {
     variables: {
       searchInput: {
         facets: [...filtersInput.facets, { key: "storeId", value: storeId }],
-        numericFilters: filtersInput.numericFilters,
+        numericFilters: filtersInput.numericFilters.find((f) => f.key === "expectedAt")
+          ? filtersInput.numericFilters
+          : [
+              ...filtersInput.numericFilters,
+              {
+                key: "expectedAt",
+                min: new Date(formatDateFromEpoch(new Date().setHours(0, 0, 0, 0))).getTime(),
+                max: new Date(formatDateFromEpoch(new Date().setHours(0, 0, 0, 0) + 86400000)).getTime(),
+              },
+            ],
         from: (pageState - 1) * ITEMS_PER_PAGE,
         to: pageState * ITEMS_PER_PAGE,
       },
