@@ -6,7 +6,7 @@ import OrderCard from "./order-card";
 import { useDispatch, useSelector } from "react-redux";
 import { UPDATE_ORDER_NOTIFICATION } from "../../graphql/orders/mutations/update-order-notification.mutation";
 import { OrderNotificationFragment } from "../../graphql/orders/fragments/__generated__/OrderNotificationFragment";
-import { FacetInput, NumericFilterInput, OrderNotificationStatus, OrderState, PaymentState } from "../../graphql/__generated__/globalTypes";
+import { FacetInput, NumericFilterInput, OrderNotificationStatus} from "../../graphql/__generated__/globalTypes";
 import { OrderNotificationActions } from "../../store/order-notification.slice";
 import { ORDER_NOTIFICATION_SUBSCRIPTION } from "../../graphql/orders/subscriptions/order-notification.subscription";
 import { AuthRestorerResponse } from "../../store/auth.slice";
@@ -51,6 +51,7 @@ function OrdersList() {
   useSubscription(ORDER_NOTIFICATION_SUBSCRIPTION, {
     variables: { storeId: authState.storeIds?.at(0) },
     onSubscriptionData: ({ client, subscriptionData }) => {
+      console.log(subscriptionData, authState.storeIds?.at(0) === subscriptionData.data.orderNotification.storeId)
       if (authState.storeIds?.at(0) === subscriptionData.data.orderNotification.storeId) {
         notificationDispatch({
           type: "addNotification",
@@ -71,7 +72,6 @@ function OrdersList() {
               {
                 key: "expectedAt",
                 min: new Date(formatDateFromEpoch(new Date().setHours(0, 0, 0, 0))).getTime(),
-                max: new Date(formatDateFromEpoch(new Date().setHours(0, 0, 0, 0) + 86400000)).getTime(),
               },
             ],
         from: (pageState - 1) * ITEMS_PER_PAGE,
@@ -94,6 +94,8 @@ function OrdersList() {
         throw new Error();
     }
   }
+
+  console.log(notificationState)
 
   const skeletonPage = (
     <Card className="w-full space-y-5 p-4" radius="lg">
@@ -151,11 +153,11 @@ function OrdersList() {
       <div className="w-full flex flew-row space-x-2">
         <div className="w-3/4">
           {loading && skeletonPage}
-          {!loading && ordersSearch?.ordersSearch?.totalCount > 0 && (
+          {!loading &&  (
             <>
               {notificationState.length > 0 && <NewOrdersList notifications={notificationState} />}
-              {ordersListMarkup}
-              {paginationMarkup}
+              {ordersSearch?.ordersSearch?.totalCount > 0 && ordersListMarkup}
+              {ordersSearch?.ordersSearch?.totalCount > 0 && paginationMarkup}
             </>
           )}
         </div>
